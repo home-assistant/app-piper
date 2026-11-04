@@ -1,4 +1,4 @@
-ARG BUILD_FROM
+ARG BUILD_FROM=ghcr.io/home-assistant/base-debian:trixie
 FROM ${BUILD_FROM}
 
 # Set shell
@@ -6,8 +6,8 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Install Piper
 WORKDIR /usr/src
-ARG WYOMING_PIPER_VERSION
-ARG UV_VERSION
+ARG WYOMING_PIPER_VERSION=2.5.2
+ARG UV_VERSION=0.12.12
 
 ENV WYOMING_PIPER_VERSION=${WYOMING_PIPER_VERSION}
 
@@ -52,3 +52,9 @@ HEALTHCHECK --start-period=30m --interval=30s --timeout=20s --retries=3 \
     CMD /usr/bin/python3 -m wyoming_piper.health_check \
         --uri tcp://127.0.0.1:10200 \
         || exit 1
+
+LABEL \
+    org.opencontainers.image.title="Home Assistant App: Piper" \
+    org.opencontainers.image.description="Text-to-speech with Piper" \
+    org.opencontainers.image.source="https://github.com/home-assistant/app-piper" \
+    org.opencontainers.image.licenses="Apache License 2.0"

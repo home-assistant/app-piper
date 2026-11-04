@@ -174,6 +174,6 @@ In case you've found an bug, please [open an issue on our GitHub][issue].
 
 [discord]: https://www.home-assistant.io/join-chat
 [forum]: https://community.home-assistant.io
-[issue]: https://github.com/home-assistant/addons/issues
+[issue]: https://github.com/home-assistant/app-piper/issues
 [reddit]: https://reddit.com/r/homeassistant
 [repository]: https://github.com/hassio-addons/repository
