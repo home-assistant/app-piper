@@ -1,4 +1,5 @@
-ARG BUILD_FROM=ghcr.io/home-assistant/base-debian:trixie
+# Base image updated by Renovate, update versionCompatibility on Alpine base bump
+ARG BUILD_FROM=ghcr.io/home-assistant/base-debian:trixie-2026.10.3@sha256:a9fb29d0ffab1a81d6379e6252db21e0edbd1263c94d9de2cfc54a396aad8611
 FROM ${BUILD_FROM}
 
 # Set shell
