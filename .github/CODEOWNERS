@@ -1,0 +1,8 @@
+# Code owners for this repository.
+#
+# People listed here are automatically requested for review when someone
+# opens a pull request that touches code they own.
+#
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+* @synesthesiam
