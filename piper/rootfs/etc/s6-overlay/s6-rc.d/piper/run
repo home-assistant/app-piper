@@ -11,6 +11,12 @@
 # <language>/<name>/ directory instead.
 readonly omnivoice_voices_dir='/data/omnivoice_voices'
 
+# Voice models from Piper's catalog are kept apart from uploaded ones, so
+# config.yaml can leave the re-downloadable half out of backups. Uploads still
+# go to --download-dir (/data), while catalog downloads are directed here and
+# any catalog copies already in /data are moved here at startup.
+readonly catalog_voices_dir='/data/catalog_voices'
+
 # Ingress proxies to the container's address rather than to loopback, so the web
 # UI has to bind every interface -- which also puts it in reach of every other
 # app on the same Docker network. It has no authentication of its own, so the
@@ -32,6 +38,17 @@ if bashio::config.true 'debug_logging'; then
 fi
 
 mkdir -p "${omnivoice_voices_dir}"
+
+# Move any catalog voices already in /data (from <= 2.5.2, or uploaded
+# unmodified through the web UI) before Piper starts, so a voice is never moved
+# out from under it. Never fatal: an unsorted voice costs backup space and
+# nothing else.
+if ! sorted_voices="$(python3 /usr/local/bin/sort_catalog_voices.py \
+    /data "${catalog_voices_dir}" 2>&1)"; then
+    bashio::log.warning "Could not sort catalog voices: ${sorted_voices}"
+elif bashio::var.has_value "${sorted_voices}"; then
+    bashio::log.info "${sorted_voices}"
+fi
 
 backend="$(bashio::config 'backend')"
 if [[ "${backend}" == 'omnivoice' ]]; then
@@ -89,11 +106,13 @@ done
 # cloning voices even while Piper is the active backend.
 #
 # shellcheck disable=SC2068
-exec python3 -m wyoming_piper \
+exec python3 /usr/local/bin/sort_catalog_voices.py \
+    --run "${catalog_voices_dir}" \
     --uri 'tcp://0.0.0.0:10200' \
     --zeroconf \
     --sentence-silence "$(bashio::config 'sentence_silence')" \
     --data-dir /data \
+    --data-dir "${catalog_voices_dir}" \
     --data-dir /share/piper \
     --download-dir /data \
     --omnivoice-ref-dir "${omnivoice_voices_dir}" \
