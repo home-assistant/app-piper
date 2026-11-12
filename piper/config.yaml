@@ -10,8 +10,8 @@ arch:
 init: false
 discovery:
   - wyoming
-# Voice models ("*.onnx") are not excluded by pattern: /data also holds voices
-# uploaded through the web interface, which exist nowhere else. Downloads go to
+# Voice models ("*.onnx") are not excluded by pattern: voices uploaded through
+# the web interface (/data/uploaded_voices) exist nowhere else. Downloads go to
 # their own directory instead, and only that and the other disposable caches
 # below are skipped.
 backup_exclude:

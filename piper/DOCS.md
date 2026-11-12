@@ -134,18 +134,18 @@ Voices in `/share/piper` are listed but cannot be deleted from the web
 interface, because that directory is mounted read-only. Delete those files
 directly instead.
 
-Uploaded voices are saved in `/data` and included in the app's backups, since
-they exist nowhere else. Everything that can be downloaded again is left out:
-voices from Piper's catalog (kept in `/data/downloads`), the OmniVoice model
-weights and the downloads for the Japanese and Thai options. After a restore,
-catalog voices are downloaded again when they are first used.
+Uploaded voices are saved in `/data/uploaded_voices` and included in the app's
+backups, since they exist nowhere else. Everything that can be downloaded again
+is left out: voices from Piper's catalog (kept in `/data/downloads`), the
+OmniVoice model weights and the downloads for the Japanese and Thai options.
+After a restore, catalog voices are downloaded again when they are first used.
 
-Catalog voices downloaded by earlier versions of the app sit in `/data` and are
-moved to `/data/downloads` the first time this version starts. A voice is only
-moved when its files are byte for byte the catalog's, so a voice of your own
-that reuses a catalog name — a fine-tune exported as `en_US-lessac-medium.onnx`,
-say — stays in `/data` and in backups, and is used instead of the catalog
-voice.
+Earlier versions of the app kept both kinds of voice directly in `/data`. The
+first time this version starts, it sorts them: a voice whose files are byte for
+byte the catalog's moves to `/data/downloads`, and every other voice moves to
+`/data/uploaded_voices`. So a voice of your own that reuses a catalog name — a
+fine-tune exported as `en_US-lessac-medium.onnx`, say — stays in backups and is
+used instead of the catalog voice.
 
 ## Custom Voices
 

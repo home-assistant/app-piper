@@ -5,16 +5,18 @@
 # Start Piper service
 # ==============================================================================
 
+# Piper voices uploaded through the web UI, as <voice>.onnx pairs. They exist
+# nowhere else, so this directory is backed up.
+readonly uploaded_voices_dir='/data/uploaded_voices'
+
 # Reference recordings for OmniVoice cloning voices, uploaded through the web
-# UI. Kept separate from the Piper voice models, which are <voice>.onnx pairs
-# sitting directly in /data (and /share/piper); an OmniVoice voice is a
-# <language>/<name>/ directory instead.
+# UI. An OmniVoice voice is a <language>/<name>/ directory rather than a
+# <voice>.onnx pair, so it is kept apart from the Piper voices.
 readonly omnivoice_voices_dir='/data/omnivoice_voices'
 
 # Everything wyoming-piper downloads: catalog voices, voices.json and the
 # HuggingFace cache (OmniVoice weights). All of it can be fetched again, so
-# config.yaml leaves the whole directory out of backups. Voices uploaded through
-# the web UI go to /data instead (--upload-dir), which is backed up.
+# config.yaml leaves the whole directory out of backups.
 readonly download_dir='/data/downloads'
 
 # Ingress proxies to the container's address rather than to loopback, so the web
@@ -37,13 +39,13 @@ if bashio::config.true 'debug_logging'; then
     flags+=('--debug')
 fi
 
-mkdir -p "${omnivoice_voices_dir}" "${download_dir}"
+mkdir -p "${uploaded_voices_dir}" "${omnivoice_voices_dir}" "${download_dir}"
 
-# Up to wyoming-piper 2.5.2 downloads went straight into /data. Move them to
-# the download directory once, before Piper starts so nothing is moved out from
-# under it. The marker lives in the download directory, which backups leave
-# out, so restoring an older backup runs this again. Never fatal: a voice left
-# in /data still works and only costs backup space.
+# Up to wyoming-piper 2.5.2, downloads and uploads both went straight into
+# /data. Sort them into their own directories once, before Piper starts so
+# nothing is moved out from under it. The marker lives in the download
+# directory, which backups leave out, so restoring an older backup runs this
+# again. Never fatal: it is retried on the next start.
 readonly migrated_marker="${download_dir}/.migrated"
 if [[ ! -e "${migrated_marker}" ]]; then
     if [[ -d /data/hub && ! -e "${download_dir}/hub" ]]; then
@@ -51,8 +53,8 @@ if [[ ! -e "${migrated_marker}" ]]; then
             || bashio::log.warning "Could not move /data/hub to ${download_dir}"
     fi
 
-    if moved="$(python3 /usr/local/bin/move_catalog_voices.py \
-        /data "${download_dir}" 2>&1)"; then
+    if moved="$(python3 /usr/local/bin/migrate_voices.py \
+        /data "${download_dir}" "${uploaded_voices_dir}" 2>&1)"; then
         if bashio::var.has_value "${moved}"; then
             bashio::log.info "${moved}"
         fi
@@ -62,7 +64,7 @@ if [[ ! -e "${migrated_marker}" ]]; then
         rm -f /data/voices.json
         touch "${migrated_marker}"
     else
-        bashio::log.warning "Could not move catalog voices: ${moved}"
+        bashio::log.warning "Could not move voices out of /data: ${moved}"
     fi
 fi
 
@@ -126,11 +128,11 @@ exec python3 -m wyoming_piper \
     --uri 'tcp://0.0.0.0:10200' \
     --zeroconf \
     --sentence-silence "$(bashio::config 'sentence_silence')" \
-    --data-dir /data \
+    --data-dir "${uploaded_voices_dir}" \
     --data-dir "${download_dir}" \
     --data-dir /share/piper \
     --download-dir "${download_dir}" \
-    --upload-dir /data \
+    --upload-dir "${uploaded_voices_dir}" \
     --omnivoice-ref-dir "${omnivoice_voices_dir}" \
     --web-server \
     --web-server-host '0.0.0.0' \
