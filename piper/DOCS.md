@@ -134,10 +134,18 @@ Voices in `/share/piper` are listed but cannot be deleted from the web
 interface, because that directory is mounted read-only. Delete those files
 directly instead.
 
-Because voices can be added and removed here, the set you end up with is your
-own and is included in the app's backups — including uploads, which exist
-nowhere else. Only the large re-downloadable caches are left out: the OmniVoice
-model weights and the downloads for the Japanese and Thai options.
+Uploaded voices are saved in `/data` and included in the app's backups, since
+they exist nowhere else. Everything that can be downloaded again is left out:
+voices from Piper's catalog (kept in `/data/downloads`), the OmniVoice model
+weights and the downloads for the Japanese and Thai options. After a restore,
+catalog voices are downloaded again when they are first used.
+
+Catalog voices downloaded by earlier versions of the app sit in `/data` and are
+moved to `/data/downloads` the first time this version starts. A voice is only
+moved when its files are byte for byte the catalog's, so a voice of your own
+that reuses a catalog name — a fine-tune exported as `en_US-lessac-medium.onnx`,
+say — stays in `/data` and in backups, and is used instead of the catalog
+voice.
 
 ## Custom Voices
 
