@@ -23,6 +23,7 @@ backup_exclude:
 map:
   - share
 ingress: true
+ingress_stream: true
 panel_icon: mdi:account-voice
 panel_title: Piper voices
 options:
